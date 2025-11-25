@@ -12,11 +12,43 @@ interface HomeProps {
 
 export default function Home({ role }: HomeProps) {
   const [searchTerm, setSearchTerm] = useState("");
+  const isGuest = role === "GUEST";
+
+  // Recent presale news items (mock data)
+  const recentPresaleNews = [
+    {
+      id: 1,
+      type: "New Launch",
+      title: "Oceanside Residences by Concord Pacific",
+      location: "Coal Harbour",
+      date: "Jan 15, 2024",
+      description: "Luxury waterfront development launching with 280 units. Pricing starts from $1.2M for 1-bedroom.",
+      image: "/background/PH4-1777 BAYSHORE DR DJI_0595.JPG"
+    },
+    {
+      id: 2,
+      type: "Completion",
+      title: "The Lauren Completed & Ready for Occupancy",
+      location: "Brentwood",
+      date: "Jan 10, 2024",
+      description: "Polygon's flagship project at Gilmore & Lougheed successfully completed. 450 units delivered.",
+      image: "/background/False Creek DJI_0781101-1450 PENNYFARTHING DR .JPG"
+    },
+    {
+      id: 3,
+      type: "Market Update",
+      title: "Assignment Market Sees 15% Increase in Q4",
+      location: "Metro Vancouver",
+      date: "Jan 5, 2024",
+      description: "Strong demand for presale assignments as interest rates stabilize. Verified listings up 28%.",
+      image: "/background/PH4-1777 BAYSHORE DR DJI_0607.JPG"
+    }
+  ];
 
   return (
     <div className="min-h-screen">
       {/* HERO SECTION */}
-      <section className="relative h-[600px] flex items-center justify-center overflow-hidden">
+      <section className={`relative ${isGuest ? 'h-[600px]' : 'h-[400px]'} flex items-center justify-center overflow-hidden`}>
         {/* Background Image with Overlay */}
         <div className="absolute inset-0 z-0">
           <img 
@@ -70,6 +102,69 @@ export default function Home({ role }: HomeProps) {
           </motion.div>
         </div>
       </section>
+
+      {/* RECENT PRESALE INFO SECTION - Only for Guests */}
+      {isGuest && (
+        <section className="py-20 bg-white border-y border-gray-100">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <span className="inline-block py-1 px-3 rounded-full bg-brand-gold/10 border border-brand-gold/30 text-brand-gold text-xs font-bold uppercase tracking-wider mb-4">
+                Market Intelligence
+              </span>
+              <h2 className="font-heading font-bold text-3xl text-brand-navy mb-3">Recent Presale Updates</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Stay informed with the latest presale launches, completions, and market trends in Metro Vancouver
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {recentPresaleNews.map((news) => (
+                <motion.div
+                  key={news.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: news.id * 0.1 }}
+                  className="bg-white rounded-xl border border-border overflow-hidden hover:shadow-lg hover:border-brand-gold/30 transition-all duration-300 group cursor-pointer"
+                >
+                  <div className="relative h-48 overflow-hidden">
+                    <img 
+                      src={news.image} 
+                      alt={news.title}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute top-3 left-3">
+                      <span className="inline-block px-3 py-1 rounded-full bg-brand-navy text-white text-xs font-bold">
+                        {news.type}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                      <MapPin size={12} className="text-brand-gold" />
+                      <span>{news.location}</span>
+                      <span className="text-gray-300">•</span>
+                      <span>{news.date}</span>
+                    </div>
+                    <h3 className="font-heading font-bold text-lg text-brand-navy mb-2 leading-tight">
+                      {news.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground line-clamp-3">
+                      {news.description}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            <div className="text-center mt-10">
+              <Button variant="outline" className="border-brand-navy text-brand-navy hover:bg-brand-navy hover:text-white font-bold">
+                View All Market Updates
+              </Button>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* LISTINGS SECTION */}
       <section className="py-20 container mx-auto px-4">
