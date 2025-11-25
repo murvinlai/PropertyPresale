@@ -59,9 +59,6 @@ export function Navbar({ role, setRole }: NavbarProps) {
               Agent Dashboard
             </Link>
           )}
-          <Link href="/admin" className="text-sm font-medium hover:text-brand-gold transition-colors">
-            Admin Dashboard
-          </Link>
         </nav>
 
         {/* Role Switcher & Auth */}
@@ -86,6 +83,12 @@ export function Navbar({ role, setRole }: NavbarProps) {
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setRole("AGENT")}>
                 Verified Realtor
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href="/admin" className="cursor-pointer">
+                  Admin Dashboard
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
