@@ -132,17 +132,15 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <div className="bg-white border-b border-gray-200 py-8">
-        <div className="container mx-auto px-4">
-          <h1 className="font-heading font-bold text-2xl text-brand-navy">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Manage users and listings</p>
+    <div className="min-h-screen bg-gray-50 pt-24 pb-20">
+      <div className="container mx-auto px-4">
+        <div className="mb-8">
+          <h1 className="font-heading font-bold text-3xl text-brand-navy mb-2">Admin Dashboard</h1>
+          <p className="text-muted-foreground">Manage users and listings for the platform</p>
         </div>
-      </div>
 
-      <div className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="listings">
-          <TabsList className="mb-8">
+        <Tabs defaultValue="listings" className="space-y-6">
+          <TabsList>
             <TabsTrigger value="listings" className="gap-2">
               <Home size={16} /> Listings ({listings.length})
             </TabsTrigger>
@@ -152,272 +150,318 @@ export default function AdminDashboard() {
           </TabsList>
 
           {/* LISTINGS TAB */}
-          <TabsContent value="listings">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>All Listings</CardTitle>
-                <Dialog open={isListingDialogOpen} onOpenChange={setIsListingDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button onClick={() => setEditingListing(null)} className="gap-2">
-                      <Plus size={16} /> Add Listing
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle>{editingListing ? "Edit Listing" : "Create New Listing"}</DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={handleSaveListing} className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label>Project Name</Label>
-                          <Input name="project" defaultValue={editingListing?.project} required />
-                        </div>
-                        <div>
-                          <Label>Neighborhood</Label>
-                          <Input name="neighborhood" defaultValue={editingListing?.neighborhood} required />
-                        </div>
-                        <div>
-                          <Label>Developer</Label>
-                          <Input name="developer" defaultValue={editingListing?.developer} required />
-                        </div>
-                        <div>
-                          <Label>Developer Initials</Label>
-                          <Input name="developerInitials" defaultValue={editingListing?.developerInitials} required />
-                        </div>
-                        <div>
-                          <Label>Bedrooms</Label>
-                          <Input type="number" name="bedrooms" defaultValue={editingListing?.bedrooms} required />
-                        </div>
-                        <div>
-                          <Label>Bathrooms</Label>
-                          <Input type="number" name="bathrooms" defaultValue={editingListing?.bathrooms} required />
-                        </div>
-                        <div>
-                          <Label>Square Feet</Label>
-                          <Input type="number" name="sqft" defaultValue={editingListing?.sqft} required />
-                        </div>
-                        <div>
-                          <Label>Floor</Label>
-                          <Input type="number" name="floor" defaultValue={editingListing?.floor} required />
-                        </div>
-                        <div>
-                          <Label>Completion</Label>
-                          <Input name="completion" defaultValue={editingListing?.completion} placeholder="Q4 2025" required />
-                        </div>
-                        <div>
-                          <Label>Contract Date</Label>
-                          <Input type="date" name="contractDate" defaultValue={editingListing?.contractDate?.split('T')[0]} required />
-                        </div>
-                        <div>
-                          <Label>Original Price</Label>
-                          <Input type="number" name="originalPrice" defaultValue={editingListing?.originalPrice} required />
-                        </div>
-                        <div>
-                          <Label>Asking Price</Label>
-                          <Input type="number" name="askingPrice" defaultValue={editingListing?.askingPrice} required />
-                        </div>
-                        <div>
-                          <Label>Deposit Paid</Label>
-                          <Input type="number" name="depositPaid" defaultValue={editingListing?.depositPaid} required />
-                        </div>
-                        <div>
-                          <Label>Assignment Fee (%)</Label>
-                          <Input type="number" step="0.1" name="assignmentFee" defaultValue={editingListing?.assignmentFee} required />
-                        </div>
-                        <div>
-                          <Label>Status</Label>
-                          <Select name="status" defaultValue={editingListing?.status || "ACTIVE"}>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="ACTIVE">Active</SelectItem>
-                              <SelectItem value="PENDING">Pending</SelectItem>
-                              <SelectItem value="SOLD">Sold</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div>
-                          <Label>Lead Pool Status</Label>
-                          <Select name="leadPoolStatus" defaultValue={editingListing?.leadPoolStatus || "NOT_IN_POOL"}>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="NOT_IN_POOL">Not in Pool</SelectItem>
-                              <SelectItem value="TIER_1">Tier 1 (Hot)</SelectItem>
-                              <SelectItem value="TIER_2">Tier 2 (Stale)</SelectItem>
-                              <SelectItem value="CLAIMED">Claimed</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div>
-                          <Label>Verified</Label>
-                          <Select name="isVerified" defaultValue={editingListing?.isVerified ? "true" : "false"}>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="true">Yes</SelectItem>
-                              <SelectItem value="false">No</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
+          <TabsContent value="listings" className="space-y-4">
+            <div className="flex justify-end">
+              <Dialog open={isListingDialogOpen} onOpenChange={setIsListingDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button onClick={() => setEditingListing(null)} className="gap-2">
+                    <Plus size={16} /> Add Listing
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>{editingListing ? "Edit Listing" : "Create New Listing"}</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleSaveListing} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Project Name</Label>
+                        <Input name="project" defaultValue={editingListing?.project} required />
                       </div>
-                      <Button type="submit" className="w-full">
-                        {editingListing ? "Update Listing" : "Create Listing"}
-                      </Button>
-                    </form>
-                  </DialogContent>
-                </Dialog>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Project</TableHead>
-                      <TableHead>Neighborhood</TableHead>
-                      <TableHead>Beds/Baths</TableHead>
-                      <TableHead>Price</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {listings.map((listing) => (
-                      <TableRow key={listing.id}>
-                        <TableCell className="font-medium">{listing.project}</TableCell>
-                        <TableCell>{listing.neighborhood}</TableCell>
-                        <TableCell>{listing.bedrooms}bd / {listing.bathrooms}ba</TableCell>
-                        <TableCell>${(listing.askingPrice / 1000).toFixed(0)}k</TableCell>
-                        <TableCell>
-                          <Badge variant={listing.status === "ACTIVE" ? "default" : "secondary"}>
-                            {listing.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right space-x-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setEditingListing(listing);
-                              setIsListingDialogOpen(true);
-                            }}
-                          >
-                            <Edit size={14} />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleDeleteListing(listing.id)}
-                          >
-                            <Trash2 size={14} />
-                          </Button>
-                        </TableCell>
+                      <div>
+                        <Label>Neighborhood</Label>
+                        <Input name="neighborhood" defaultValue={editingListing?.neighborhood} required />
+                      </div>
+                      <div>
+                        <Label>Developer</Label>
+                        <Input name="developer" defaultValue={editingListing?.developer} required />
+                      </div>
+                      <div>
+                        <Label>Developer Initials</Label>
+                        <Input name="developerInitials" defaultValue={editingListing?.developerInitials} required />
+                      </div>
+                      <div>
+                        <Label>Bedrooms</Label>
+                        <Input type="number" name="bedrooms" defaultValue={editingListing?.bedrooms} required />
+                      </div>
+                      <div>
+                        <Label>Bathrooms</Label>
+                        <Input type="number" name="bathrooms" defaultValue={editingListing?.bathrooms} required />
+                      </div>
+                      <div>
+                        <Label>Square Feet</Label>
+                        <Input type="number" name="sqft" defaultValue={editingListing?.sqft} required />
+                      </div>
+                      <div>
+                        <Label>Floor</Label>
+                        <Input type="number" name="floor" defaultValue={editingListing?.floor} required />
+                      </div>
+                      <div>
+                        <Label>Completion</Label>
+                        <Input name="completion" defaultValue={editingListing?.completion} placeholder="Q4 2025" required />
+                      </div>
+                      <div>
+                        <Label>Contract Date</Label>
+                        <Input type="date" name="contractDate" defaultValue={editingListing?.contractDate?.split('T')[0]} required />
+                      </div>
+                      <div>
+                        <Label>Original Price</Label>
+                        <Input type="number" name="originalPrice" defaultValue={editingListing?.originalPrice} required />
+                      </div>
+                      <div>
+                        <Label>Asking Price</Label>
+                        <Input type="number" name="askingPrice" defaultValue={editingListing?.askingPrice} required />
+                      </div>
+                      <div>
+                        <Label>Deposit Paid</Label>
+                        <Input type="number" name="depositPaid" defaultValue={editingListing?.depositPaid} required />
+                      </div>
+                      <div>
+                        <Label>Assignment Fee (%)</Label>
+                        <Input type="number" step="0.1" name="assignmentFee" defaultValue={editingListing?.assignmentFee} required />
+                      </div>
+                      <div>
+                        <Label>Status</Label>
+                        <Select name="status" defaultValue={editingListing?.status || "ACTIVE"}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="ACTIVE">Active</SelectItem>
+                            <SelectItem value="PENDING">Pending</SelectItem>
+                            <SelectItem value="SOLD">Sold</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>Lead Pool Status</Label>
+                        <Select name="leadPoolStatus" defaultValue={editingListing?.leadPoolStatus || "NOT_IN_POOL"}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="NOT_IN_POOL">Not in Pool</SelectItem>
+                            <SelectItem value="TIER_1">Tier 1 (Hot)</SelectItem>
+                            <SelectItem value="TIER_2">Tier 2 (Stale)</SelectItem>
+                            <SelectItem value="CLAIMED">Claimed</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>Verified</Label>
+                        <Select name="isVerified" defaultValue={editingListing?.isVerified ? "true" : "false"}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="true">Yes</SelectItem>
+                            <SelectItem value="false">No</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <Button type="submit" className="w-full">
+                      {editingListing ? "Update Listing" : "Create Listing"}
+                    </Button>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <Card>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-gray-50">
+                        <TableHead className="w-[100px]">ID</TableHead>
+                        <TableHead>Project</TableHead>
+                        <TableHead>Prop Type</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Address</TableHead>
+                        <TableHead>S/A</TableHead>
+                        <TableHead className="text-right">Price</TableHead>
+                        <TableHead>Yr Blt</TableHead>
+                        <TableHead>Lot SqFt</TableHead>
+                        <TableHead>TypeOwnd</TableHead>
+                        <TableHead>Floor Area</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {listings.map((listing, index) => (
+                        <TableRow key={listing.id} className="hover:bg-gray-50">
+                          <TableCell className="font-mono text-xs">{index + 1}</TableCell>
+                          <TableCell className="font-medium">{listing.project}</TableCell>
+                          <TableCell>Residential Attached</TableCell>
+                          <TableCell>
+                            <Badge variant={listing.status === "ACTIVE" ? "default" : "secondary"} className="text-xs">
+                              {listing.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{listing.neighborhood}</TableCell>
+                          <TableCell>{listing.developerInitials}</TableCell>
+                          <TableCell className="text-right font-medium">
+                            ${listing.askingPrice.toLocaleString()}
+                          </TableCell>
+                          <TableCell>{listing.completion}</TableCell>
+                          <TableCell>{listing.depositPaid.toLocaleString()}</TableCell>
+                          <TableCell>{listing.bedrooms}BR</TableCell>
+                          <TableCell>{listing.sqft}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                  setEditingListing(listing);
+                                  setIsListingDialogOpen(true);
+                                }}
+                              >
+                                <Edit size={14} />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleDeleteListing(listing.id)}
+                              >
+                                <Trash2 size={14} />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {listings.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={12} className="text-center py-8 text-muted-foreground">
+                            No listings yet. Click "Add Listing" to create one.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* USERS TAB */}
-          <TabsContent value="users">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>All Users</CardTitle>
-                <Dialog open={isUserDialogOpen} onOpenChange={setIsUserDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button onClick={() => setEditingUser(null)} className="gap-2">
-                      <Plus size={16} /> Add User
+          <TabsContent value="users" className="space-y-4">
+            <div className="flex justify-end">
+              <Dialog open={isUserDialogOpen} onOpenChange={setIsUserDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button onClick={() => setEditingUser(null)} className="gap-2">
+                    <Plus size={16} /> Add User
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>{editingUser ? "Edit User" : "Create New User"}</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleSaveUser} className="space-y-4">
+                    <div>
+                      <Label>Username</Label>
+                      <Input name="username" defaultValue={editingUser?.username} required />
+                    </div>
+                    <div>
+                      <Label>Email</Label>
+                      <Input type="email" name="email" defaultValue={editingUser?.email} required />
+                    </div>
+                    {!editingUser && (
+                      <div>
+                        <Label>Password</Label>
+                        <Input type="password" name="password" placeholder="Leave blank for default (password123)" />
+                      </div>
+                    )}
+                    <div>
+                      <Label>Role</Label>
+                      <Select name="role" defaultValue={editingUser?.role || "GUEST"}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="GUEST">Guest</SelectItem>
+                          <SelectItem value="MEMBER">Member</SelectItem>
+                          <SelectItem value="AGENT">Agent</SelectItem>
+                          <SelectItem value="ADMIN">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Button type="submit" className="w-full">
+                      {editingUser ? "Update User" : "Create User"}
                     </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>{editingUser ? "Edit User" : "Create New User"}</DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={handleSaveUser} className="space-y-4">
-                      <div>
-                        <Label>Username</Label>
-                        <Input name="username" defaultValue={editingUser?.username} required />
-                      </div>
-                      <div>
-                        <Label>Email</Label>
-                        <Input type="email" name="email" defaultValue={editingUser?.email} required />
-                      </div>
-                      {!editingUser && (
-                        <div>
-                          <Label>Password</Label>
-                          <Input type="password" name="password" placeholder="Leave blank for default" />
-                        </div>
-                      )}
-                      <div>
-                        <Label>Role</Label>
-                        <Select name="role" defaultValue={editingUser?.role || "GUEST"}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="GUEST">Guest</SelectItem>
-                            <SelectItem value="MEMBER">Member</SelectItem>
-                            <SelectItem value="AGENT">Agent</SelectItem>
-                            <SelectItem value="ADMIN">Admin</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <Button type="submit" className="w-full">
-                        {editingUser ? "Update User" : "Create User"}
-                      </Button>
-                    </form>
-                  </DialogContent>
-                </Dialog>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Username</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Verified</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {users.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="font-medium">{user.username}</TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{user.role}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          {user.isVerified ? "✓" : "✗"}
-                        </TableCell>
-                        <TableCell className="text-right space-x-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setEditingUser(user);
-                              setIsUserDialogOpen(true);
-                            }}
-                          >
-                            <Edit size={14} />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleDeleteUser(user.id)}
-                          >
-                            <Trash2 size={14} />
-                          </Button>
-                        </TableCell>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <Card>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-gray-50">
+                        <TableHead className="w-[100px]">ID</TableHead>
+                        <TableHead>Username</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Role</TableHead>
+                        <TableHead>Verified</TableHead>
+                        <TableHead>Created</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {users.map((user, index) => (
+                        <TableRow key={user.id} className="hover:bg-gray-50">
+                          <TableCell className="font-mono text-xs">{index + 1}</TableCell>
+                          <TableCell className="font-medium">{user.username}</TableCell>
+                          <TableCell>{user.email}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{user.role}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            {user.isVerified ? (
+                              <Badge variant="default" className="bg-green-100 text-green-700">✓</Badge>
+                            ) : (
+                              <Badge variant="secondary">✗</Badge>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {new Date(user.createdAt).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                  setEditingUser(user);
+                                  setIsUserDialogOpen(true);
+                                }}
+                              >
+                                <Edit size={14} />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleDeleteUser(user.id)}
+                              >
+                                <Trash2 size={14} />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {users.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                            No users yet. Click "Add User" to create one.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

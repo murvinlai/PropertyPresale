@@ -60,7 +60,7 @@ export function Navbar({ role, setRole }: NavbarProps) {
             </Link>
           )}
           <Link href="/admin" className="text-sm font-medium hover:text-brand-gold transition-colors">
-            Admin
+            Admin Dashboard
           </Link>
         </nav>
 

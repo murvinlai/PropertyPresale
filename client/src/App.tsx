@@ -28,9 +28,7 @@ function Router() {
         <Route path="/agent">
           {role === "AGENT" ? <AgentDashboard /> : <div className="p-20 text-center">Access Denied. Switch to Agent View.</div>}
         </Route>
-        <Route path="/admin">
-          <AdminDashboard />
-        </Route>
+        <Route path="/admin" component={AdminDashboard} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
