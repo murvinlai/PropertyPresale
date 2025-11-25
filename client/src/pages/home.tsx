@@ -20,7 +20,7 @@ export default function Home({ role }: HomeProps) {
         {/* Background Image with Overlay */}
         <div className="absolute inset-0 z-0">
           <img 
-            src="/attached_assets/generated_images/modern_vancouver_glass_skyscraper_exterior.png" 
+            src="/background/False Creek DJI_0787101-1450 PENNYFARTHING DR .JPG" 
             alt="Vancouver Skyline" 
             className="w-full h-full object-cover"
           />
