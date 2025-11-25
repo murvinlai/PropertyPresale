@@ -59,6 +59,9 @@ export function Navbar({ role, setRole }: NavbarProps) {
               Agent Dashboard
             </Link>
           )}
+          <Link href="/admin" className="text-sm font-medium hover:text-brand-gold transition-colors">
+            Admin
+          </Link>
         </nav>
 
         {/* Role Switcher & Auth */}
