@@ -16,6 +16,7 @@ export const users = pgTable("users", {
 
 export const listings = pgTable("listings", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
   project: text("project").notNull(),
   neighborhood: text("neighborhood").notNull(),
   bedrooms: integer("bedrooms").notNull(),
@@ -52,6 +53,8 @@ export const insertListingSchema = createInsertSchema(listings).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  userId: z.string().min(1, "User must be selected"),
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;

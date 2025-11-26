@@ -4,6 +4,7 @@ export type UserRole = "GUEST" | "MEMBER" | "AGENT";
 
 export interface Listing {
   id: string;
+  userId: string;
   project: string; // Hidden for guests
   neighborhood: string;
   bedrooms: number;
@@ -32,6 +33,7 @@ export interface Listing {
 export const MOCK_LISTINGS: Listing[] = [
   {
     id: "1",
+    userId: "user-1", // This should reference an actual user ID
     project: "The Amazing Brentwood Tower 6",
     neighborhood: "Brentwood",
     bedrooms: 1,
@@ -57,6 +59,7 @@ export const MOCK_LISTINGS: Listing[] = [
   },
   {
     id: "2",
+    userId: "user-1", // This should reference an actual user ID
     project: "Concord Metrotown",
     neighborhood: "Metrotown",
     bedrooms: 2,

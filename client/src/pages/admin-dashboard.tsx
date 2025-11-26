@@ -73,6 +73,7 @@ export default function AdminDashboard() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const listingData = {
+      userId: formData.get("userId"),
       project: formData.get("project"),
       neighborhood: formData.get("neighborhood"),
       bedrooms: parseInt(formData.get("bedrooms") as string),
@@ -164,6 +165,21 @@ export default function AdminDashboard() {
                   </DialogHeader>
                   <form onSubmit={handleSaveListing} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
+                      <div className="col-span-2">
+                        <Label>Owner (Member/Realtor)</Label>
+                        <Select name="userId" defaultValue={editingListing?.userId} required>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select owner" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {users.filter(u => u.role === "MEMBER" || u.role === "AGENT").map(user => (
+                              <SelectItem key={user.id} value={user.id}>
+                                {user.username} ({user.role})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                       <div>
                         <Label>Project Name</Label>
                         <Input name="project" defaultValue={editingListing?.project} required />
@@ -275,6 +291,7 @@ export default function AdminDashboard() {
                     <TableHeader>
                       <TableRow className="bg-gray-50">
                         <TableHead className="w-[100px]">ID</TableHead>
+                        <TableHead>Owner</TableHead>
                         <TableHead>Project</TableHead>
                         <TableHead>Prop Type</TableHead>
                         <TableHead>Status</TableHead>
@@ -292,6 +309,9 @@ export default function AdminDashboard() {
                       {listings.map((listing, index) => (
                         <TableRow key={listing.id} className="hover:bg-gray-50">
                           <TableCell className="font-mono text-xs">{index + 1}</TableCell>
+                          <TableCell>
+                            {users.find(u => u.id === listing.userId)?.username || "Unknown"}
+                          </TableCell>
                           <TableCell className="font-medium">{listing.project}</TableCell>
                           <TableCell>Residential Attached</TableCell>
                           <TableCell>
@@ -333,7 +353,7 @@ export default function AdminDashboard() {
                       ))}
                       {listings.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={12} className="text-center py-8 text-muted-foreground">
+                          <TableCell colSpan={13} className="text-center py-8 text-muted-foreground">
                             No listings yet. Click "Add Listing" to create one.
                           </TableCell>
                         </TableRow>

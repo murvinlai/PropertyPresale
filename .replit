@@ -38,5 +38,14 @@ task = "shell.exec"
 args = "npm run dev:client"
 waitForPort = 5000
 
+[[workflows.workflow]]
+name = "Start Backend Server"
+author = 49583526
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev:server"
+
 [agent]
 mockupState = "MOCKUP"
