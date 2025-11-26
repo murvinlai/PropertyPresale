@@ -48,7 +48,7 @@ export default function Home({ role }: HomeProps) {
   return (
     <div className="min-h-screen">
       {/* HERO SECTION */}
-      <section className={`relative ${isGuest ? 'h-[600px]' : 'h-[400px]'} flex items-center justify-center overflow-hidden`}>
+      <section className={`relative ${isGuest ? 'h-[600px]' : 'h-[200px]'} flex items-center justify-center overflow-hidden`}>
         {/* Background Image with Overlay */}
         <div className="absolute inset-0 z-0">
           <img 
@@ -66,17 +66,25 @@ export default function Home({ role }: HomeProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <span className="inline-block py-1 px-3 rounded-full bg-brand-gold/20 border border-brand-gold/40 text-brand-gold text-xs font-bold uppercase tracking-wider mb-4 backdrop-blur-md">
-              Exclusive Presale Marketplace
-            </span>
-            <h1 className="font-heading font-extrabold text-4xl md:text-6xl lg:text-7xl text-white mb-6 leading-tight">
-              Unlock Verified <br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-gold to-yellow-200">Assignment Deals</span>
-            </h1>
-            <p className="text-lg md:text-xl text-gray-200 mb-10 max-w-2xl mx-auto font-light">
-              The only compliant platform to buy and sell pre-sale contracts in Vancouver. 
-              Access inventory hidden from MLS.
-            </p>
+            {isGuest ? (
+              <>
+                <span className="inline-block py-1 px-3 rounded-full bg-brand-gold/20 border border-brand-gold/40 text-brand-gold text-xs font-bold uppercase tracking-wider mb-4 backdrop-blur-md">
+                  Exclusive Presale Marketplace
+                </span>
+                <h1 className="font-heading font-extrabold text-4xl md:text-6xl lg:text-7xl text-white mb-6 leading-tight">
+                  Unlock Verified <br/>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-gold to-yellow-200">Assignment Deals</span>
+                </h1>
+                <p className="text-lg md:text-xl text-gray-200 mb-10 max-w-2xl mx-auto font-light">
+                  The only compliant platform to buy and sell pre-sale contracts in Vancouver. 
+                  Access inventory hidden from MLS.
+                </p>
+              </>
+            ) : (
+              <h1 className="font-heading font-extrabold text-3xl md:text-4xl text-white mb-6 leading-tight">
+                Available <span className="text-brand-gold">Assignments</span>
+              </h1>
+            )}
 
             {/* Search Bar */}
             <div className="max-w-4xl mx-auto bg-white p-2 rounded-2xl shadow-2xl shadow-brand-navy/50 flex flex-col md:flex-row gap-2">
