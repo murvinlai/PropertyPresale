@@ -58,18 +58,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const listingData = insertListingSchema.parse(req.body);
       const listing = await storage.createListing(listingData);
       res.json(listing);
-    } catch (error) {
-      res.status(400).json({ error: "Invalid listing data" });
+    } catch (error: any) {
+      if (error.errors && Array.isArray(error.errors)) {
+        // Zod validation error
+        const fieldErrors = error.errors.map((err: any) => ({
+          field: err.path.join('.'),
+          message: err.message
+        }));
+        res.status(400).json({ 
+          error: "Validation failed",
+          severity: "USER_INPUT_ERROR",
+          details: fieldErrors,
+          userMessage: `Please check the following fields: ${fieldErrors.map((e: any) => e.field).join(', ')}`
+        });
+      } else {
+        res.status(400).json({ 
+          error: "Invalid listing data",
+          severity: "USER_INPUT_ERROR",
+          userMessage: "Please check all required fields are filled in correctly"
+        });
+      }
     }
   });
 
   app.put("/api/listings/:id", async (req, res) => {
-    const listing = await storage.updateListing(req.params.id, req.body);
-    if (!listing) {
-      res.status(404).json({ error: "Listing not found" });
-      return;
+    try {
+      const listing = await storage.updateListing(req.params.id, req.body);
+      if (!listing) {
+        res.status(404).json({ 
+          error: "Listing not found",
+          severity: "ERROR",
+          userMessage: "The listing you're trying to update doesn't exist"
+        });
+        return;
+      }
+      res.json(listing);
+    } catch (error: any) {
+      if (error.errors && Array.isArray(error.errors)) {
+        const fieldErrors = error.errors.map((err: any) => ({
+          field: err.path.join('.'),
+          message: err.message
+        }));
+        res.status(400).json({ 
+          error: "Validation failed",
+          severity: "USER_INPUT_ERROR",
+          details: fieldErrors,
+          userMessage: `Please check the following fields: ${fieldErrors.map((e: any) => e.field).join(', ')}`
+        });
+      } else {
+        res.status(400).json({ 
+          error: "Invalid listing data",
+          severity: "USER_INPUT_ERROR",
+          userMessage: "Please check all required fields are filled in correctly"
+        });
+      }
     }
-    res.json(listing);
   });
 
   app.delete("/api/listings/:id", async (req, res) => {

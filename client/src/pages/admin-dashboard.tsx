@@ -126,17 +126,47 @@ export default function AdminDashboard() {
       if (!response.ok) {
         const error = await response.json();
         console.error("Failed to save listing:", error);
-        toast({ title: `Failed to save listing: ${error.error}`, variant: "destructive" });
+        
+        // Determine error severity and show appropriate message
+        let title = "";
+        let description = "";
+        
+        if (error.severity === "USER_INPUT_ERROR") {
+          title = "⚠️ Input Error";
+          description = error.userMessage || "Please check your input and try again.";
+          
+          if (error.details && error.details.length > 0) {
+            description += "\n\nIssues found:\n" + error.details.map((d: any) => 
+              `• ${d.field}: ${d.message}`
+            ).join('\n');
+          }
+        } else if (error.severity === "CRITICAL_ERROR") {
+          title = "🔴 Critical Error";
+          description = error.userMessage || "A critical error occurred. Please contact support.";
+        } else {
+          title = "❌ Error";
+          description = error.userMessage || error.error || "Failed to save listing";
+        }
+        
+        toast({ 
+          title, 
+          description,
+          variant: "destructive" 
+        });
         return;
       }
 
-      toast({ title: editingListing ? "Listing updated successfully" : "Listing created successfully" });
+      toast({ title: editingListing ? "✅ Listing updated successfully" : "✅ Listing created successfully" });
       setIsListingDialogOpen(false);
       setEditingListing(null);
       fetchListings();
     } catch (error) {
       console.error("Error saving listing:", error);
-      toast({ title: "Failed to save listing", variant: "destructive" });
+      toast({ 
+        title: "🔴 Critical Error",
+        description: "An unexpected error occurred. Please try again or contact support.",
+        variant: "destructive" 
+      });
     }
   };
 
