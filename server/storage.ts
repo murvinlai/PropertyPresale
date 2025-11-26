@@ -104,3 +104,24 @@ export class MemStorage implements IStorage {
 }
 
 export const storage = new MemStorage();
+
+// Seed initial data for testing
+(async () => {
+  // Create a test user if none exist
+  const users = await storage.getAllUsers();
+  if (users.length === 0) {
+    await storage.createUser({
+      username: "admin",
+      email: "admin@28house.com",
+      password: "password123",
+      role: "ADMIN"
+    });
+    
+    await storage.createUser({
+      username: "member1",
+      email: "member@28house.com",
+      password: "password123",
+      role: "MEMBER"
+    });
+  }
+})();

@@ -27,15 +27,27 @@ export default function AdminDashboard() {
   }, []);
 
   const fetchUsers = async () => {
-    const response = await fetch("/api/users");
-    const data = await response.json();
-    setUsers(data);
+    try {
+      const response = await fetch("/api/users");
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
+      toast({ title: "Failed to fetch users", variant: "destructive" });
+    }
   };
 
   const fetchListings = async () => {
-    const response = await fetch("/api/listings");
-    const data = await response.json();
-    setListings(data);
+    try {
+      const response = await fetch("/api/listings");
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const data = await response.json();
+      setListings(data);
+    } catch (error) {
+      console.error("Failed to fetch listings:", error);
+      toast({ title: "Failed to fetch listings", variant: "destructive" });
+    }
   };
 
   const handleSaveUser = async (e: React.FormEvent<HTMLFormElement>) => {
