@@ -98,7 +98,7 @@ export default function AdminDashboard() {
       originalPrice: parseInt(formData.get("originalPrice") as string),
       askingPrice: parseInt(formData.get("askingPrice") as string),
       depositPaid: parseInt(formData.get("depositPaid") as string),
-      assignmentFee: formData.get("assignmentFee"),
+      assignmentFee: formData.get("assignmentFee") as string,
       contractDate: new Date(formData.get("contractDate") as string),
       images: ["/background/False Creek DJI_0787101-1450 PENNYFARTHING DR .JPG"],
       floorplan: "/attached_assets/generated_images/clean_architectural_floorplan_line_drawing.png",
@@ -107,25 +107,37 @@ export default function AdminDashboard() {
       leadPoolStatus: formData.get("leadPoolStatus"),
     };
 
-    if (editingListing) {
-      await fetch(`/api/listings/${editingListing.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(listingData),
-      });
-      toast({ title: "Listing updated successfully" });
-    } else {
-      await fetch("/api/listings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(listingData),
-      });
-      toast({ title: "Listing created successfully" });
-    }
+    try {
+      let response;
+      if (editingListing) {
+        response = await fetch(`/api/listings/${editingListing.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(listingData),
+        });
+      } else {
+        response = await fetch("/api/listings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(listingData),
+        });
+      }
 
-    setIsListingDialogOpen(false);
-    setEditingListing(null);
-    fetchListings();
+      if (!response.ok) {
+        const error = await response.json();
+        console.error("Failed to save listing:", error);
+        toast({ title: `Failed to save listing: ${error.error}`, variant: "destructive" });
+        return;
+      }
+
+      toast({ title: editingListing ? "Listing updated successfully" : "Listing created successfully" });
+      setIsListingDialogOpen(false);
+      setEditingListing(null);
+      fetchListings();
+    } catch (error) {
+      console.error("Error saving listing:", error);
+      toast({ title: "Failed to save listing", variant: "destructive" });
+    }
   };
 
   const handleDeleteUser = async (id: string) => {
@@ -246,7 +258,7 @@ export default function AdminDashboard() {
                       </div>
                       <div>
                         <Label>Assignment Fee (%)</Label>
-                        <Input type="number" step="0.1" name="assignmentFee" defaultValue={editingListing?.assignmentFee} required />
+                        <Input type="text" name="assignmentFee" defaultValue={editingListing?.assignmentFee} placeholder="2.5" required />
                       </div>
                       <div>
                         <Label>Status</Label>
