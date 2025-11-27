@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -126,15 +125,15 @@ export default function AdminDashboard() {
       if (!response.ok) {
         const error = await response.json();
         console.error("Failed to save listing:", error);
-        
+
         // Determine error severity and show appropriate message
         let title = "";
         let description = "";
-        
+
         if (error.severity === "USER_INPUT_ERROR") {
           title = "⚠️ Input Error";
           description = error.userMessage || "Please check your input and try again.";
-          
+
           if (error.details && error.details.length > 0) {
             description += "\n\nIssues found:\n" + error.details.map((d: any) => 
               `• ${d.field}: ${d.message}`
@@ -147,7 +146,7 @@ export default function AdminDashboard() {
           title = "❌ Error";
           description = error.userMessage || error.error || "Failed to save listing";
         }
-        
+
         toast({ 
           title, 
           description,
@@ -272,7 +271,33 @@ export default function AdminDashboard() {
                       </div>
                       <div>
                         <Label>Contract Date</Label>
-                        <Input type="date" name="contractDate" defaultValue={editingListing?.contractDate?.split('T')[0]} required />
+                        <Input 
+                          type="text" 
+                          placeholder="YYYY-MM-DD"
+                          maxLength={10}
+                          defaultValue={editingListing?.contractDate ? editingListing.contractDate.split('T')[0] : ""}
+                          onChange={(e) => {
+                            let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+
+                            // Auto-format with dashes
+                            if (value.length >= 4) {
+                              value = value.slice(0, 4) + '-' + value.slice(4);
+                            }
+                            if (value.length >= 7) {
+                              value = value.slice(0, 7) + '-' + value.slice(7, 9);
+                            }
+                            
+                            // Manually update the input's value to reflect the formatting
+                            e.target.value = value;
+
+                            // Trigger the form field's onChange to update the form state
+                            const inputElement = document.querySelector(`input[name="contractDate"]`) as HTMLInputElement;
+                            if (inputElement) {
+                              const nativeInputEvent = new Event('input', { bubbles: true });
+                              inputElement.dispatchEvent(nativeInputEvent);
+                            }
+                          }}
+                        />
                       </div>
                       <div>
                         <Label>Original Price</Label>
