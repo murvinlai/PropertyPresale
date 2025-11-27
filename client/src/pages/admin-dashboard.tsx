@@ -234,7 +234,7 @@ export default function AdminDashboard() {
                   <form onSubmit={handleSaveListing} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="col-span-2">
-                        <Label>Owner (Member/Realtor)</Label>
+                        <Label>Owner (Member/Realtor) <span className="text-red-500">*</span></Label>
                         <Select name="userId" defaultValue={editingListing?.userId} required>
                           <SelectTrigger>
                             <SelectValue placeholder="Select owner" />
@@ -249,43 +249,43 @@ export default function AdminDashboard() {
                         </Select>
                       </div>
                       <div>
-                        <Label>Project Name</Label>
+                        <Label>Project Name <span className="text-red-500">*</span></Label>
                         <Input name="project" defaultValue={editingListing?.project} required />
                       </div>
                       <div>
-                        <Label>Neighborhood</Label>
+                        <Label>Neighborhood <span className="text-red-500">*</span></Label>
                         <Input name="neighborhood" defaultValue={editingListing?.neighborhood} required />
                       </div>
                       <div>
-                        <Label>Developer</Label>
+                        <Label>Developer <span className="text-red-500">*</span></Label>
                         <Input name="developer" defaultValue={editingListing?.developer} required />
                       </div>
                       <div>
-                        <Label>Developer Initials</Label>
+                        <Label>Developer Initials <span className="text-red-500">*</span></Label>
                         <Input name="developerInitials" defaultValue={editingListing?.developerInitials} required />
                       </div>
                       <div>
-                        <Label>Bedrooms</Label>
+                        <Label>Bedrooms <span className="text-red-500">*</span></Label>
                         <Input type="number" name="bedrooms" defaultValue={editingListing?.bedrooms} required />
                       </div>
                       <div>
-                        <Label>Bathrooms</Label>
+                        <Label>Bathrooms <span className="text-red-500">*</span></Label>
                         <Input type="number" name="bathrooms" defaultValue={editingListing?.bathrooms} required />
                       </div>
                       <div>
-                        <Label>Square Feet</Label>
+                        <Label>Square Feet <span className="text-red-500">*</span></Label>
                         <Input type="number" name="sqft" defaultValue={editingListing?.sqft} required />
                       </div>
                       <div>
-                        <Label>Floor</Label>
+                        <Label>Floor <span className="text-red-500">*</span></Label>
                         <Input type="number" name="floor" defaultValue={editingListing?.floor} required />
                       </div>
                       <div>
-                        <Label>Completion</Label>
+                        <Label>Completion <span className="text-red-500">*</span></Label>
                         <Input name="completion" defaultValue={editingListing?.completion} placeholder="Q4 2025" required />
                       </div>
                       <div>
-                        <Label>Contract Date</Label>
+                        <Label>Contract Date <span className="text-red-500">*</span></Label>
                         <Input 
                           name="contractDate"
                           type="text" 
@@ -308,19 +308,19 @@ export default function AdminDashboard() {
                         />
                       </div>
                       <div>
-                        <Label>Original Price</Label>
+                        <Label>Original Price <span className="text-red-500">*</span></Label>
                         <Input type="number" name="originalPrice" defaultValue={editingListing?.originalPrice} required />
                       </div>
                       <div>
-                        <Label>Asking Price</Label>
+                        <Label>Asking Price <span className="text-red-500">*</span></Label>
                         <Input type="number" name="askingPrice" defaultValue={editingListing?.askingPrice} required />
                       </div>
                       <div>
-                        <Label>Deposit Paid</Label>
+                        <Label>Deposit Paid <span className="text-red-500">*</span></Label>
                         <Input type="number" name="depositPaid" defaultValue={editingListing?.depositPaid} required />
                       </div>
                       <div>
-                        <Label>Assignment Fee (%)</Label>
+                        <Label>Assignment Fee (%) <span className="text-red-500">*</span></Label>
                         <Input type="text" name="assignmentFee" defaultValue={editingListing?.assignmentFee} placeholder="2.5" required />
                       </div>
                       <div>
@@ -467,11 +467,11 @@ export default function AdminDashboard() {
                   </DialogHeader>
                   <form onSubmit={handleSaveUser} className="space-y-4">
                     <div>
-                      <Label>Username</Label>
+                      <Label>Username <span className="text-red-500">*</span></Label>
                       <Input name="username" defaultValue={editingUser?.username} required />
                     </div>
                     <div>
-                      <Label>Email</Label>
+                      <Label>Email <span className="text-red-500">*</span></Label>
                       <Input type="email" name="email" defaultValue={editingUser?.email} required />
                     </div>
                     {!editingUser && (
@@ -481,7 +481,7 @@ export default function AdminDashboard() {
                       </div>
                     )}
                     <div>
-                      <Label>Role</Label>
+                      <Label>Role <span className="text-red-500">*</span></Label>
                       <Select name="role" defaultValue={editingUser?.role || "GUEST"}>
                         <SelectTrigger>
                           <SelectValue />
