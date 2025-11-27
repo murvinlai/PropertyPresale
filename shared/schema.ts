@@ -55,6 +55,7 @@ export const insertListingSchema = createInsertSchema(listings).omit({
   updatedAt: true,
 }).extend({
   userId: z.string().min(1, "User must be selected"),
+  contractDate: z.string().transform((val) => new Date(val)),
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;

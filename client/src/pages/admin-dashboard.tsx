@@ -83,6 +83,21 @@ export default function AdminDashboard() {
   const handleSaveListing = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+    
+    // Parse and validate the contract date
+    const contractDateStr = formData.get("contractDate") as string;
+    const contractDate = new Date(contractDateStr);
+    
+    // Validate date is valid
+    if (isNaN(contractDate.getTime())) {
+      toast({ 
+        title: "Invalid Date",
+        description: "Please enter a valid contract date in YYYY-MM-DD format",
+        variant: "destructive" 
+      });
+      return;
+    }
+    
     const listingData = {
       userId: formData.get("userId"),
       project: formData.get("project"),
@@ -98,7 +113,7 @@ export default function AdminDashboard() {
       askingPrice: parseInt(formData.get("askingPrice") as string),
       depositPaid: parseInt(formData.get("depositPaid") as string),
       assignmentFee: formData.get("assignmentFee") as string,
-      contractDate: new Date(formData.get("contractDate") as string),
+      contractDate: contractDate.toISOString(),
       images: ["/background/False Creek DJI_0787101-1450 PENNYFARTHING DR .JPG"],
       floorplan: "/attached_assets/generated_images/clean_architectural_floorplan_line_drawing.png",
       status: formData.get("status"),
@@ -272,6 +287,7 @@ export default function AdminDashboard() {
                       <div>
                         <Label>Contract Date</Label>
                         <Input 
+                          name="contractDate"
                           type="text" 
                           placeholder="YYYY-MM-DD"
                           maxLength={10}
@@ -287,15 +303,7 @@ export default function AdminDashboard() {
                               value = value.slice(0, 7) + '-' + value.slice(7, 9);
                             }
                             
-                            // Manually update the input's value to reflect the formatting
                             e.target.value = value;
-
-                            // Trigger the form field's onChange to update the form state
-                            const inputElement = document.querySelector(`input[name="contractDate"]`) as HTMLInputElement;
-                            if (inputElement) {
-                              const nativeInputEvent = new Event('input', { bubbles: true });
-                              inputElement.dispatchEvent(nativeInputEvent);
-                            }
                           }}
                         />
                       </div>
