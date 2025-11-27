@@ -1,6 +1,12 @@
 
-import { type User, type InsertUser, type Listing, type InsertListing } from "@shared/schema";
-import { randomUUID } from "crypto";
+import { drizzle } from 'drizzle-orm/neon-serverless';
+import { Pool, neonConfig } from '@neondatabase/serverless';
+import ws from 'ws';
+import { eq } from 'drizzle-orm';
+import { users, listings, type User, type InsertUser, type Listing, type InsertListing } from "@shared/schema";
+
+// Configure WebSocket for Neon serverless
+neonConfig.webSocketConstructor = ws;
 
 export interface IStorage {
   // Users
@@ -19,109 +25,99 @@ export interface IStorage {
   deleteListing(id: string): Promise<boolean>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-  private listings: Map<string, Listing>;
+export class DatabaseStorage implements IStorage {
+  private db;
 
-  constructor() {
-    this.users = new Map();
-    this.listings = new Map();
+  constructor(databaseUrl: string) {
+    const pool = new Pool({ connectionString: databaseUrl });
+    this.db = drizzle(pool);
   }
 
   // User methods
   async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+    const result = await this.db.select().from(users).where(eq(users.id, id)).limit(1);
+    return result[0];
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const result = await this.db.select().from(users).where(eq(users.username, username)).limit(1);
+    return result[0];
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { 
-      ...insertUser, 
-      id,
-      isVerified: false,
-      createdAt: new Date(),
-    };
-    this.users.set(id, user);
-    return user;
+    const result = await this.db.insert(users).values(insertUser).returning();
+    return result[0];
   }
 
   async getAllUsers(): Promise<User[]> {
-    return Array.from(this.users.values());
+    return await this.db.select().from(users);
   }
 
   async updateUser(id: string, updates: Partial<User>): Promise<User | undefined> {
-    const user = this.users.get(id);
-    if (!user) return undefined;
-    const updated = { ...user, ...updates };
-    this.users.set(id, updated);
-    return updated;
+    const result = await this.db.update(users).set(updates).where(eq(users.id, id)).returning();
+    return result[0];
   }
 
   async deleteUser(id: string): Promise<boolean> {
-    return this.users.delete(id);
+    const result = await this.db.delete(users).where(eq(users.id, id)).returning();
+    return result.length > 0;
   }
 
   // Listing methods
   async getListing(id: string): Promise<Listing | undefined> {
-    return this.listings.get(id);
+    const result = await this.db.select().from(listings).where(eq(listings.id, id)).limit(1);
+    return result[0];
   }
 
   async getAllListings(): Promise<Listing[]> {
-    return Array.from(this.listings.values());
+    return await this.db.select().from(listings);
   }
 
   async createListing(insertListing: InsertListing): Promise<Listing> {
-    const id = randomUUID();
-    const listing: Listing = {
-      ...insertListing,
-      id,
-      views: 0,
-      inquiries: 0,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    this.listings.set(id, listing);
-    return listing;
+    const result = await this.db.insert(listings).values(insertListing).returning();
+    return result[0];
   }
 
   async updateListing(id: string, updates: Partial<Listing>): Promise<Listing | undefined> {
-    const listing = this.listings.get(id);
-    if (!listing) return undefined;
-    const updated = { ...listing, ...updates, updatedAt: new Date() };
-    this.listings.set(id, updated);
-    return updated;
+    const result = await this.db.update(listings).set({ ...updates, updatedAt: new Date() }).where(eq(listings.id, id)).returning();
+    return result[0];
   }
 
   async deleteListing(id: string): Promise<boolean> {
-    return this.listings.delete(id);
+    const result = await this.db.delete(listings).where(eq(listings.id, id)).returning();
+    return result.length > 0;
   }
 }
 
-export const storage = new MemStorage();
+// Initialize storage
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL environment variable is required");
+}
 
-// Seed initial data for testing
+export const storage = new DatabaseStorage(process.env.DATABASE_URL);
+
+// Seed initial data for testing (only runs once when tables are empty)
 (async () => {
-  // Create a test user if none exist
-  const users = await storage.getAllUsers();
-  if (users.length === 0) {
-    await storage.createUser({
-      username: "admin",
-      email: "admin@28house.com",
-      password: "password123",
-      role: "ADMIN"
-    });
-    
-    await storage.createUser({
-      username: "member1",
-      email: "member@28house.com",
-      password: "password123",
-      role: "MEMBER"
-    });
+  try {
+    const existingUsers = await storage.getAllUsers();
+    if (existingUsers.length === 0) {
+      await storage.createUser({
+        username: "admin",
+        email: "admin@28house.com",
+        password: "password123",
+        role: "ADMIN"
+      });
+      
+      await storage.createUser({
+        username: "member1",
+        email: "member@28house.com",
+        password: "password123",
+        role: "MEMBER"
+      });
+      
+      console.log("Seeded initial users");
+    }
+  } catch (error) {
+    console.error("Error seeding data:", error);
   }
 })();
