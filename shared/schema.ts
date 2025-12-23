@@ -1,22 +1,23 @@
 
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, decimal, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, decimal, timestamp, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
-  password: text("password").notNull(),
   email: text("email").notNull().unique(),
-  role: text("role").notNull().default("GUEST"), // GUEST, MEMBER, AGENT, ADMIN
-  isVerified: boolean("is_verified").notNull().default(false),
+  password: text("password"),
+  googleId: text("google_id").unique(),
+  role: text("role", { enum: ["GUEST", "AGENT", "ADMIN", "SUPERADMIN"] }).notNull().default("GUEST"),
+  isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const listings = pgTable("listings", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id),
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
   project: text("project").notNull(),
   neighborhood: text("neighborhood").notNull(),
   bedrooms: integer("bedrooms").notNull(),
@@ -44,9 +45,11 @@ export const listings = pgTable("listings", {
 
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
-  password: true,
   email: true,
-  role: true,
+  password: true,
+}).extend({
+  password: z.string().min(6, "Password must be at least 6 characters").optional(),
+  email: z.string().email("Invalid email address"),
 });
 
 export const insertListingSchema = createInsertSchema(listings).omit({

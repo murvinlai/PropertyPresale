@@ -1,90 +1,128 @@
-
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import ws from 'ws';
-import { eq } from 'drizzle-orm';
+import { db, pool } from "./db";
+import { eq, or, and } from "drizzle-orm";
+import session from "express-session";
+import connectPg from "connect-pg-simple";
 import { users, listings, type User, type InsertUser, type Listing, type InsertListing } from "@shared/schema";
 
-// Configure WebSocket for Neon serverless
-neonConfig.webSocketConstructor = ws;
+const PostgresSessionStore = connectPg(session);
 
 export interface IStorage {
-  // Users
-  getUser(id: string): Promise<User | undefined>;
+  getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
-  getAllUsers(): Promise<User[]>;
-  updateUser(id: string, updates: Partial<User>): Promise<User | undefined>;
-  deleteUser(id: string): Promise<boolean>;
-  
-  // Listings
-  getListing(id: string): Promise<Listing | undefined>;
-  getAllListings(): Promise<Listing[]>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  getAllUsers(): Promise<User[]>; // For seed/admin
+  createUser(user: InsertUser & { password?: string; googleId?: string; role?: string }): Promise<User>;
+  updateUserRole(id: number, role: "GUEST" | "AGENT" | "ADMIN" | "SUPERADMIN"): Promise<User>;
+  deactivateUser(id: number): Promise<User>;
+
+  getListings(): Promise<Listing[]>;
+  getAllListings(): Promise<Listing[]>; // For compatibility with older routes
+  getListing(id: number): Promise<Listing | undefined>;
   createListing(listing: InsertListing): Promise<Listing>;
-  updateListing(id: string, updates: Partial<Listing>): Promise<Listing | undefined>;
-  deleteListing(id: string): Promise<boolean>;
+  updateListing(id: number, updates: Partial<Listing>): Promise<Listing | undefined>;
+  updateListingStatus(id: number, status: string): Promise<Listing>;
+  deleteListing(id: number): Promise<boolean>;
+
+  sessionStore: session.Store;
 }
 
 export class DatabaseStorage implements IStorage {
-  private db;
+  sessionStore: session.Store;
 
-  constructor(databaseUrl: string) {
-    const pool = new Pool({ connectionString: databaseUrl });
-    this.db = drizzle(pool);
+  constructor() {
+    this.sessionStore = new PostgresSessionStore({
+      pool,
+      createTableIfMissing: true,
+    });
   }
 
-  // User methods
-  async getUser(id: string): Promise<User | undefined> {
-    const result = await this.db.select().from(users).where(eq(users.id, id)).limit(1);
-    return result[0];
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const result = await this.db.select().from(users).where(eq(users.username, username)).limit(1);
-    return result[0];
+    const [user] = await db.select().from(users).where(
+      and(eq(users.username, username), eq(users.isActive, true))
+    );
+    return user;
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const result = await this.db.insert(users).values(insertUser).returning();
-    return result[0];
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(
+      and(eq(users.email, email), eq(users.isActive, true))
+    );
+    return user;
   }
 
   async getAllUsers(): Promise<User[]> {
-    return await this.db.select().from(users);
+    return await db.select().from(users);
   }
 
-  async updateUser(id: string, updates: Partial<User>): Promise<User | undefined> {
-    const result = await this.db.update(users).set(updates).where(eq(users.id, id)).returning();
-    return result[0];
+  async createUser(insertUser: InsertUser & { password?: string; googleId?: string; role?: string }): Promise<User> {
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
   }
 
-  async deleteUser(id: string): Promise<boolean> {
-    const result = await this.db.delete(users).where(eq(users.id, id)).returning();
-    return result.length > 0;
+  async updateUserRole(id: number, role: "GUEST" | "AGENT" | "ADMIN" | "SUPERADMIN"): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ role })
+      .where(eq(users.id, id))
+      .returning();
+    if (!user) throw new Error("User not found");
+    return user;
   }
 
-  // Listing methods
-  async getListing(id: string): Promise<Listing | undefined> {
-    const result = await this.db.select().from(listings).where(eq(listings.id, id)).limit(1);
-    return result[0];
+  async deactivateUser(id: number): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ isActive: false })
+      .where(eq(users.id, id))
+      .returning();
+    if (!user) throw new Error("User not found");
+    return user;
+  }
+
+  async getListings(): Promise<Listing[]> {
+    return await db.select().from(listings);
   }
 
   async getAllListings(): Promise<Listing[]> {
-    return await this.db.select().from(listings);
+    return this.getListings();
+  }
+
+  async getListing(id: number): Promise<Listing | undefined> {
+    const [listing] = await db.select().from(listings).where(eq(listings.id, id));
+    return listing;
   }
 
   async createListing(insertListing: InsertListing): Promise<Listing> {
-    const result = await this.db.insert(listings).values(insertListing).returning();
-    return result[0];
+    const [listing] = await db.insert(listings).values(insertListing).returning();
+    return listing;
   }
 
-  async updateListing(id: string, updates: Partial<Listing>): Promise<Listing | undefined> {
-    const result = await this.db.update(listings).set({ ...updates, updatedAt: new Date() }).where(eq(listings.id, id)).returning();
-    return result[0];
+  async updateListing(id: number, updates: Partial<Listing>): Promise<Listing | undefined> {
+    const [listing] = await db
+      .update(listings)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(listings.id, id))
+      .returning();
+    return listing;
   }
 
-  async deleteListing(id: string): Promise<boolean> {
-    const result = await this.db.delete(listings).where(eq(listings.id, id)).returning();
+  async updateListingStatus(id: number, status: string): Promise<Listing> {
+    const [listing] = await db
+      .update(listings)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(listings.id, id))
+      .returning();
+    if (!listing) throw new Error("Listing not found");
+    return listing;
+  }
+
+  async deleteListing(id: number): Promise<boolean> {
+    const result = await db.delete(listings).where(eq(listings.id, id)).returning();
     return result.length > 0;
   }
 }
@@ -94,30 +132,4 @@ if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL environment variable is required");
 }
 
-export const storage = new DatabaseStorage(process.env.DATABASE_URL);
-
-// Seed initial data for testing (only runs once when tables are empty)
-(async () => {
-  try {
-    const existingUsers = await storage.getAllUsers();
-    if (existingUsers.length === 0) {
-      await storage.createUser({
-        username: "admin",
-        email: "admin@28house.com",
-        password: "password123",
-        role: "ADMIN"
-      });
-      
-      await storage.createUser({
-        username: "member1",
-        email: "member@28house.com",
-        password: "password123",
-        role: "MEMBER"
-      });
-      
-      console.log("Seeded initial users");
-    }
-  } catch (error) {
-    console.error("Error seeding data:", error);
-  }
-})();
+export const storage = new DatabaseStorage();
