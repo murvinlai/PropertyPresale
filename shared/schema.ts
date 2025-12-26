@@ -11,6 +11,7 @@ export const users = pgTable("users", {
   password: text("password"),
   googleId: text("google_id").unique(),
   role: text("role", { enum: ["GUEST", "AGENT", "ADMIN", "SUPERADMIN"] }).notNull().default("GUEST"),
+  licenseNumber: text("license_number"),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
@@ -47,9 +48,13 @@ export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   email: true,
   password: true,
+  role: true,
+  licenseNumber: true,
+}).extend({
 }).extend({
   password: z.string().min(6, "Password must be at least 6 characters").optional(),
   email: z.string().email("Invalid email address"),
+  licenseNumber: z.string().optional(),
 });
 
 export const insertListingSchema = createInsertSchema(listings).omit({

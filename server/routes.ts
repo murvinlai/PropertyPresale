@@ -2,9 +2,11 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertUserSchema, insertListingSchema } from "@shared/schema";
-import { ensureAuthenticated, ensureAdmin } from "./auth";
+import { ensureAuthenticated, ensureAdmin, setupAuth } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  setupAuth(app);
+
   // User routes
   app.get("/api/users", ensureAdmin, async (_req, res) => {
     const users = await storage.getAllUsers();

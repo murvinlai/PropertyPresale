@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useRoute } from "wouter";
+import { useAuth } from "@/hooks/use-auth";
 import { MOCK_LISTINGS, UserRole } from "@/lib/mockData";
 import { ListingCard } from "@/components/listing/ListingCard"; // Reuse for sidebar
 import { TaxCalculator } from "@/components/listing/TaxCalculator";
@@ -8,25 +9,23 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  MapPin, Calendar, Building, Ruler, 
-  ArrowLeft, Lock, ShieldCheck, User, Phone, MessageSquare 
+import {
+  MapPin, Calendar, Building, Ruler,
+  ArrowLeft, Lock, ShieldCheck, User, Phone, MessageSquare
 } from "lucide-react";
 
-interface ListingDetailProps {
-  role: UserRole;
-}
-
-export default function ListingDetail({ role }: ListingDetailProps) {
+export default function ListingDetail() {
+  const { user } = useAuth();
+  const role = (user?.role as UserRole) || "GUEST";
   const [match, params] = useRoute("/listing/:id");
   const [showVerifyModal, setShowVerifyModal] = useState(false);
-  
+
   const listing = MOCK_LISTINGS.find(l => l.id === params?.id);
   const isGuest = role === "GUEST";
 
   if (!listing) return <div>Listing not found</div>;
 
-  const formatPrice = (price: number) => 
+  const formatPrice = (price: number) =>
     new Intl.NumberFormat("en-CA", { style: "currency", currency: "CAD", maximumFractionDigits: 0 }).format(price);
 
   return (
@@ -48,16 +47,16 @@ export default function ListingDetail({ role }: ListingDetailProps) {
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
+
           {/* LEFT COLUMN: Main Content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Header Card */}
             <div className="bg-white rounded-2xl shadow-sm border border-border overflow-hidden">
               <div className="relative h-[400px] bg-gray-100">
-                <img 
-                  src={listing.images[0]} 
-                  alt="Listing" 
-                  className={`w-full h-full object-cover ${isGuest ? "blur-[6px] scale-105" : ""}`} 
+                <img
+                  src={listing.images[0]}
+                  alt="Listing"
+                  className={`w-full h-full object-cover ${isGuest ? "blur-[6px] scale-105" : ""}`}
                 />
                 {isGuest && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-brand-navy/20 backdrop-blur-sm">
@@ -75,24 +74,24 @@ export default function ListingDetail({ role }: ListingDetailProps) {
                     </div>
                   </div>
                 )}
-                
+
                 {!isGuest && (
-                   <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
-                      <div className="bg-white/90 backdrop-blur px-4 py-2 rounded-lg shadow-lg">
-                         <h1 className="font-heading font-bold text-2xl text-brand-navy">{listing.project}</h1>
-                         <p className="text-sm text-muted-foreground flex items-center gap-1">
-                           <MapPin size={14} /> {listing.neighborhood}
-                         </p>
-                      </div>
-                      {listing.isVerified && (
-                        <Badge className="bg-green-600 hover:bg-green-700 text-white gap-1 px-3 py-1.5">
-                          <ShieldCheck size={14} /> Verified Owner
-                        </Badge>
-                      )}
-                   </div>
+                  <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+                    <div className="bg-white/90 backdrop-blur px-4 py-2 rounded-lg shadow-lg">
+                      <h1 className="font-heading font-bold text-2xl text-brand-navy">{listing.project}</h1>
+                      <p className="text-sm text-muted-foreground flex items-center gap-1">
+                        <MapPin size={14} /> {listing.neighborhood}
+                      </p>
+                    </div>
+                    {listing.isVerified && (
+                      <Badge className="bg-green-600 hover:bg-green-700 text-white gap-1 px-3 py-1.5">
+                        <ShieldCheck size={14} /> Verified Owner
+                      </Badge>
+                    )}
+                  </div>
                 )}
               </div>
-              
+
               {/* Quick Stats Bar */}
               <div className="grid grid-cols-4 divide-x divide-gray-100 border-b border-gray-100">
                 <div className="p-4 text-center hover:bg-gray-50 transition-colors">
@@ -120,7 +119,7 @@ export default function ListingDetail({ role }: ListingDetailProps) {
                     <TabsTrigger value="details">Property Details</TabsTrigger>
                     <TabsTrigger value="floorplan">Floorplan</TabsTrigger>
                   </TabsList>
-                  
+
                   <TabsContent value="details" className="space-y-6">
                     <div className="grid grid-cols-2 gap-y-4 gap-x-8 text-sm">
                       <div className="flex justify-between py-2 border-b border-gray-100">
@@ -135,29 +134,29 @@ export default function ListingDetail({ role }: ListingDetailProps) {
                         <span className="text-muted-foreground">Deposit Paid</span>
                         <span className="font-medium text-brand-navy">{isGuest ? "Hidden" : formatPrice(listing.depositPaid)}</span>
                       </div>
-                       <div className="flex justify-between py-2 border-b border-gray-100">
+                      <div className="flex justify-between py-2 border-b border-gray-100">
                         <span className="text-muted-foreground">Original Price</span>
                         <span className="font-medium text-brand-navy">{isGuest ? "Hidden" : formatPrice(listing.originalPrice)}</span>
                       </div>
                     </div>
                   </TabsContent>
-                  
+
                   <TabsContent value="floorplan">
                     <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex items-center justify-center">
-                       <img 
-                         src={listing.floorplan} 
-                         alt="Floorplan" 
-                         className="max-h-[400px] w-auto mix-blend-multiply opacity-80" 
-                       />
+                      <img
+                        src={listing.floorplan}
+                        alt="Floorplan"
+                        className="max-h-[400px] w-auto mix-blend-multiply opacity-80"
+                      />
                     </div>
                   </TabsContent>
                 </Tabs>
               </div>
             </div>
-            
+
             {/* Member Only: Tax Calculator */}
             {!isGuest && (
-              <TaxCalculator 
+              <TaxCalculator
                 contractDate={listing.contractDate}
                 originalPrice={listing.originalPrice}
                 askingPrice={listing.askingPrice}
@@ -175,8 +174,8 @@ export default function ListingDetail({ role }: ListingDetailProps) {
                 <p className="text-sm text-muted-foreground font-medium mb-1">Asking Price</p>
                 {isGuest ? (
                   <div className="space-y-2">
-                     <div className="h-10 bg-gray-200 rounded animate-pulse w-3/4"></div>
-                     <p className="text-xs text-brand-gold font-bold">Est. Range: $500k - $600k</p>
+                    <div className="h-10 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                    <p className="text-xs text-brand-gold font-bold">Est. Range: $500k - $600k</p>
                   </div>
                 ) : (
                   <h2 className="text-4xl font-heading font-extrabold text-brand-navy">
@@ -192,16 +191,16 @@ export default function ListingDetail({ role }: ListingDetailProps) {
               ) : (
                 <div className="space-y-3">
                   <Button className="w-full bg-brand-gold hover:bg-brand-gold-light text-brand-navy font-bold h-12 shadow-md">
-                    <MessageSquare size={18} className="mr-2" /> 
+                    <MessageSquare size={18} className="mr-2" />
                     Message Seller (5 Credits)
                   </Button>
                   <Button variant="outline" className="w-full border-brand-navy text-brand-navy font-bold h-12 hover:bg-brand-navy/5">
                     <Phone size={18} className="mr-2" />
                     Unlock Phone # (25 Credits)
                   </Button>
-                  
+
                   <Separator className="my-4" />
-                  
+
                   <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
                     <div className="flex items-center gap-2 mb-2">
                       <User className="text-brand-navy" size={16} />
@@ -214,12 +213,12 @@ export default function ListingDetail({ role }: ListingDetailProps) {
                       Hire an Expert
                     </Button>
                   </div>
-                  
+
                   {/* Owner Actions Demo */}
                   <div className="mt-8 pt-6 border-t border-dashed border-gray-200">
                     <p className="text-xs text-center text-gray-400 mb-2 uppercase tracking-widest font-bold">Owner Controls</p>
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       className="w-full text-muted-foreground hover:text-brand-navy"
                       onClick={() => setShowVerifyModal(true)}
                     >

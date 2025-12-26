@@ -3,13 +3,15 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { UserRole } from "@/lib/mockData";
 import { ShieldCheck, Building2, UserCircle, LogOut } from "lucide-react";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuLabel, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
+import { useAuth } from "@/hooks/use-auth";
+import { LoginModal } from "@/components/auth/LoginModal";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 
 interface NavbarProps {
@@ -20,6 +22,17 @@ interface NavbarProps {
 export function Navbar({ role, setRole }: NavbarProps) {
   const [location] = useLocation();
   const [scrolled, setScrolled] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const { logoutMutation } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logoutMutation.mutateAsync();
+      setRole("GUEST" as any);
+    } catch (err) {
+      console.error("Logout failed", err);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -28,10 +41,9 @@ export function Navbar({ role, setRole }: NavbarProps) {
   }, []);
 
   return (
-    <header 
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        scrolled ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-border/50 py-3" : "bg-transparent py-5"
-      }`}
+    <header
+      className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-border/50 py-3" : "bg-transparent py-5"
+        }`}
     >
       <div className="container mx-auto px-4 flex items-center justify-between">
         {/* Logo */}
@@ -95,28 +107,36 @@ export function Navbar({ role, setRole }: NavbarProps) {
 
           {role === "GUEST" ? (
             <div className="flex gap-2">
-              <Button variant="ghost" className="text-brand-navy hover:text-brand-gold hover:bg-transparent font-medium">
+              <Button
+                variant="ghost"
+                className="text-brand-navy hover:text-brand-gold hover:bg-transparent font-medium"
+                onClick={() => setIsLoginOpen(true)}
+              >
                 Log In
               </Button>
-              <Button className="bg-brand-navy hover:bg-brand-navy-light text-white shadow-md shadow-brand-navy/20">
-                Register
-              </Button>
+              <Link href="/auth?mode=register">
+                <Button className="bg-brand-navy hover:bg-brand-navy-light text-white shadow-md shadow-brand-navy/20">
+                  Register
+                </Button>
+              </Link>
             </div>
           ) : (
             <div className="flex items-center gap-2">
-               {role === "AGENT" && (
-                 <div className="hidden md:flex items-center gap-1 px-3 py-1 bg-brand-gold/10 rounded-full border border-brand-gold/20 mr-2">
-                    <span className="w-2 h-2 rounded-full bg-brand-gold animate-pulse"></span>
-                    <span className="text-xs font-bold text-brand-gold-dark">540 Credits</span>
-                 </div>
-               )}
-               <Button variant="ghost" size="icon" onClick={() => setRole("GUEST")}>
-                 <LogOut size={18} />
-               </Button>
+              {role === "AGENT" && (
+                <div className="hidden md:flex items-center gap-1 px-3 py-1 bg-brand-gold/10 rounded-full border border-brand-gold/20 mr-2">
+                  <span className="w-2 h-2 rounded-full bg-brand-gold animate-pulse"></span>
+                  <span className="text-xs font-bold text-brand-gold-dark">540 Credits</span>
+                </div>
+              )}
+              <Button variant="ghost" size="icon" onClick={handleLogout}>
+                <LogOut size={18} />
+              </Button>
             </div>
           )}
         </div>
       </div>
+
+      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
     </header>
   );
 }

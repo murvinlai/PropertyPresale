@@ -5,6 +5,7 @@ import session from "express-session";
 import bcrypt from "bcryptjs";
 import { storage } from "./storage";
 import { type User as SelectUser } from "@shared/schema";
+import { verifyRealtor } from "./services/bcfsa";
 
 declare global {
     namespace Express {
@@ -75,6 +76,15 @@ export function setupAuth(app: Express) {
         }
     });
 
+    app.post("/api/verify-realtor", async (req, res) => {
+        const { licenseNumber, name } = req.body;
+        if (!licenseNumber || !name) {
+            return res.status(400).json({ isValid: false, error: "Missing license number or name" });
+        }
+        const result = await verifyRealtor(licenseNumber, name);
+        res.json(result);
+    });
+
     app.post("/api/register", async (req, res, next) => {
         try {
             const existingUser = await storage.getUserByUsername(req.body.username);
@@ -86,11 +96,28 @@ export function setupAuth(app: Express) {
                 return res.status(400).send("Email already exists");
             }
 
+            let role = "GUEST";
+            let licenseNumber = undefined;
+
+            if (req.body.role === "AGENT") {
+                // Secure server-side verification for AGENT role
+                if (!req.body.licenseNumber || !req.body.legalName) {
+                    return res.status(400).send("License number and legal name required for Agent registration");
+                }
+                const check = await verifyRealtor(req.body.licenseNumber, req.body.legalName);
+                if (!check.isValid) {
+                    return res.status(400).send(`Agent verification failed: ${check.error}`);
+                }
+                role = "AGENT";
+                licenseNumber = req.body.licenseNumber;
+            }
+
             const hashedPassword = await bcrypt.hash(req.body.password, 10);
             const user = await storage.createUser({
                 ...req.body,
                 password: hashedPassword,
-                role: "GUEST", // Force GUEST role on public registration
+                role,
+                licenseNumber
             });
 
             req.login(user, (err) => {
